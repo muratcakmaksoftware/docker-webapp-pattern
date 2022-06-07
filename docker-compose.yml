@@ -1,44 +1,48 @@
 version: "3.9"
 
 services:
-
   php:
     restart: always
     container_name: app-php
-    
     build:
-      context: ./php
+      context: ./images/php
       dockerfile: Dockerfile
-
     working_dir: /var/www
-
     expose:
-      - 9000
-
+      - ${PHP_INTERNAL_PORT:-9000}
     volumes:
       - ./www:/var/www
-
-    env_file:
-      - ./.env
-
     environment:
       - APP_ENV=production
-
     networks:
       default:
-        ipv4_address: 172.20.0.20
+        ipv4_address: 172.20.0.10
 
   web:
     restart: always
     container_name: app-nginx
     build:
-      context: ./nginx
+      context: ./images/nginx
       dockerfile: Dockerfile
     ports:
       - "80:80"
+    networks:
+      default:
+        ipv4_address: 172.20.0.20
+
+  redis:
+    restart: always
+    container_name: app-redis
+    build:
+      context: ./images/redis
+      dockerfile: Dockerfile
+    ports:
+      - "6379:6379"
+    networks:
+      default:
+        ipv4_address: 172.20.0.30
 
 networks:
-
   default:
     driver: bridge
     name: default_network
@@ -47,5 +51,5 @@ networks:
         - subnet: 172.20.0.0/16
 
 volumes:
-  myapp_volume:
+  myapp:
     driver: local
