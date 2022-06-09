@@ -30,6 +30,45 @@ services:
       default:
         ipv4_address: 172.20.0.20
 
+  #Check requirements from app-php
+  postgresql:
+    restart: always
+    container_name: app-postgresql
+    build:
+      context: ./images/postgresql
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-db_name}
+      POSTGRES_USER: ${POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-123456}
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./images/postgresql/data:/var/lib/postgresql/data
+    networks:
+      default:
+        ipv4_address: 172.20.0.30
+
+  #Check requirements from app-php
+  mysql:
+    restart: always
+    container_name: app-mysql
+    build:
+      context: ./images/mysql
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-db_name}
+      MYSQL_USER: ${MYSQL_USER:-db_user_name}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-123456}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-12346789}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./images/mysql/data:/var/lib/mysql
+    networks:
+      default:
+        ipv4_address: 172.20.0.35
+
   redis:
     restart: always
     container_name: app-redis
@@ -40,7 +79,7 @@ services:
       - "6379:6379"
     networks:
       default:
-        ipv4_address: 172.20.0.30
+        ipv4_address: 172.20.0.40
 
 networks:
   default:
