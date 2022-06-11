@@ -30,7 +30,7 @@ services:
       default:
         ipv4_address: 172.20.0.20
 
-  #Check requirements from app-php
+  #PHP dockerfile göre gerekli kütüphaneleri ayarlanması gerekir. Default olarak postgresql alınmıştır.
   postgresql:
     restart: always
     container_name: app-postgresql
@@ -49,7 +49,7 @@ services:
       default:
         ipv4_address: 172.20.0.30
 
-  #Check requirements from app-php
+  #PHP dockerfile göre gerekli kütüphaneleri ayarlanması gerekir. Mysql kullanacaksanız PHP Dockerfile kütüphanelerini düzeltiniz.
   mysql:
     restart: always
     container_name: app-mysql

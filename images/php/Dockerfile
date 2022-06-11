@@ -16,6 +16,14 @@ FROM php:8.1.6-fpm-alpine3.14
 #&& docker-php-ext-install pgsql pdo_pgsql \
 #&& apk del postgresql-dev
 
+#Composer Yüklemek için
+#ÖNERİLEN:
+#COPY --from=composer /usr/bin/composer /usr/bin/composer4
+#VEYA ayrı bir RUN olarak çalışması gerekmektedir.
+#RUN curl -s https://getcomposer.org/installer | php
+
+#bootstrap.sh gerekli özel yüklemeler, chmod gibi yapılandırma gibi işleri sağlayabiliriz. RUN da yazılma sebebi tekrarsız olsun diyedir. ENTRYPOINT bu yüzden kullanılmamıştır.
+
 RUN apk update \
     && apk add --no-cache \
     bash \
@@ -33,4 +41,6 @@ RUN apk update \
     pgsql \
     pdo_pgsql \
     && apk del  \
-    postgresql-dev
+    postgresql-dev \
+    && bootstrap.sh
+
