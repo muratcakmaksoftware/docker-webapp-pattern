@@ -5,20 +5,18 @@ services:
     restart: always
     container_name: app-php
     build:
-      context: ./images/php
+      context: ./docker/images/php
       dockerfile: Dockerfile
     working_dir: /var/www/html
     expose:
       - ${PHP_INTERNAL_PORT:-9000}
     volumes:
-      - ./www:/var/www/html
+      - ./:/var/www/html
     #bootstrap.sh gerekli özel yüklemeler, chmod gibi yapılandırma gibi işleri sağlayabiliriz.
     #Dockerfile da yapılmamasının nedeni Volume(proje dosyaları) container aktif olduk olduktan sonra senkron edilmektedir.
     #Proje veya genel olarak her şey için ilgili bir işlem yapılabilmesi gerektiğinde kullanabiliriz.
     command: ["/bin/sh", "-c", "/startup/bootstrap.sh"]
 
-    environment:
-      - APP_ENV=production
     networks:
       default:
         ipv4_address: 172.20.0.10
@@ -27,7 +25,7 @@ services:
     restart: always
     container_name: app-nginx
     build:
-      context: ./images/nginx
+      context: ./docker/images/nginx
       dockerfile: Dockerfile
     ports:
       - "80:80"
@@ -40,7 +38,7 @@ services:
     restart: always
     container_name: app-postgresql
     build:
-      context: ./images/postgresql
+      context: ./docker/images/postgresql
       dockerfile: Dockerfile
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-db_name}
@@ -49,36 +47,36 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - ./images/postgresql/data:/var/lib/postgresql/data
+      - ./docker/images/postgresql/data:/var/lib/postgresql/data
     networks:
       default:
         ipv4_address: 172.20.0.30
 
   #PHP dockerfile göre gerekli kütüphaneleri ayarlanması gerekir. Mysql kullanacaksanız PHP Dockerfile kütüphanelerini düzeltiniz.
-  mysql:
-    restart: always
-    container_name: app-mysql
-    build:
-      context: ./images/mysql
-      dockerfile: Dockerfile
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-db_name}
-      MYSQL_USER: ${MYSQL_USER:-db_user_name}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-123456}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-12346789}
-    ports:
-      - "3306:3306"
-    volumes:
-      - ./images/mysql/data:/var/lib/mysql
-    networks:
-      default:
-        ipv4_address: 172.20.0.35
+  #  mysql:
+  #    restart: always
+  #    container_name: app-mysql
+  #    build:
+  #      context: ./docker/images/mysql
+  #      dockerfile: Dockerfile
+  #    environment:
+  #      MYSQL_DATABASE: ${MYSQL_DATABASE:-db_name}
+  #      MYSQL_USER: ${MYSQL_USER:-db_user_name}
+  #      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-123456}
+  #      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-12346789}
+  #    ports:
+  #      - "3306:3306"
+  #    volumes:
+  #      - ./images/mysql/data:/var/lib/mysql
+  #    networks:
+  #      default:
+  #        ipv4_address: 172.20.0.35
 
   redis:
     restart: always
     container_name: app-redis
     build:
-      context: ./images/redis
+      context: ./docker/images/redis
       dockerfile: Dockerfile
     ports:
       - "6379:6379"
