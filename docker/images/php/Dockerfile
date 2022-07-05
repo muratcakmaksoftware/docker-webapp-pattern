@@ -22,9 +22,6 @@ FROM php:8.1.6-fpm-alpine3.14
 #VEYA ayrı bir RUN olarak çalışması gerekmektedir.
 #RUN curl -s https://getcomposer.org/installer | php
 
-#docker-compose.yml tarafından tetiklenir ve her container çalıştığında bootstrap.sh çalışacaktır.
-COPY bootstrap.sh /startup/
-
 RUN apk update \
     && apk add --no-cache \
     bash \
@@ -42,6 +39,5 @@ RUN apk update \
     pgsql \
     pdo_pgsql \
     && apk del  \
-    postgresql-dev \
-    && chmod -R 777 /startup/bootstrap.sh
+    postgresql-dev
 

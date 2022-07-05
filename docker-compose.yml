@@ -12,11 +12,6 @@ services:
       - ${PHP_INTERNAL_PORT:-9000}
     volumes:
       - ./:/var/www/html
-    #bootstrap.sh gerekli özel yüklemeler, chmod gibi yapılandırma gibi işleri sağlayabiliriz.
-    #Dockerfile da yapılmamasının nedeni Volume(proje dosyaları) container aktif olduk olduktan sonra senkron edilmektedir.
-    #Proje veya genel olarak her şey için ilgili bir işlem yapılabilmesi gerektiğinde kullanabiliriz.
-    command: ["/bin/sh", "-c", "/startup/bootstrap.sh"]
-
     networks:
       default:
         ipv4_address: 172.20.0.10
@@ -33,7 +28,7 @@ services:
       default:
         ipv4_address: 172.20.0.20
 
-  #PHP dockerfile göre gerekli kütüphaneleri ayarlanması gerekir. Default olarak postgresql alınmıştır.
+  #PHP > Dockerfile göre gerekli kütüphaneleri ayarlanması gerekir. Default olarak postgresql alınmıştır.
   postgresql:
     restart: always
     container_name: app-postgresql
@@ -52,7 +47,7 @@ services:
       default:
         ipv4_address: 172.20.0.30
 
-  #PHP dockerfile göre gerekli kütüphaneleri ayarlanması gerekir. Mysql kullanacaksanız PHP Dockerfile kütüphanelerini düzeltiniz.
+  #PHP > Dockerfile göre gerekli kütüphaneleri ayarlanması gerekir. Mysql kullanacaksanız PHP Dockerfile kütüphanelerini düzeltiniz.
   #  mysql:
   #    restart: always
   #    container_name: app-mysql
@@ -80,6 +75,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "6379:6379"
+    volumes:
+      - ./docker/images/redis/data:/data
     networks:
       default:
         ipv4_address: 172.20.0.40
