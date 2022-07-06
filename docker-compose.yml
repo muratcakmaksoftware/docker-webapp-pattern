@@ -95,10 +95,44 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-guest}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-guest}
-      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST:-my_host_name}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST:-/}
     networks:
       default:
         ipv4_address: 172.20.0.50
+
+  mongodb:
+    restart: always
+    container_name: app-mongodb
+    build:
+      context: ./docker/images/mongodb
+      dockerfile: Dockerfile
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./docker/images/mongodb/data/db:/data/db
+      - ./docker/images/mongodb/data/configdb:/data/configdb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-root}
+    networks:
+      default:
+        ipv4_address: 172.20.0.60
+
+  mongo-express:
+    restart: always
+    container_name: app-mongo-express
+    build:
+      context: ./docker/images/mongo-express
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${ME_CONFIG_MONGODB_ADMINUSERNAME:-root}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${ME_CONFIG_MONGODB_ADMINPASSWORD:-root}
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    networks:
+      default:
+        ipv4_address: 172.20.0.70
 
 networks:
   default:
