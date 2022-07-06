@@ -1,4 +1,4 @@
-# Monolithic Architecture
+# Monolithic | Microservices Architecture
 
 ## Installation & Run
 ```
@@ -8,10 +8,12 @@ docker-compose up -d
 ## Default Config
 
 - PHP
-- Postgresql
-- Redis
-- RabbitMQ
-- MongoDB
+- NGINX
+- Postgresql (Relational Database Management System (RDBMS))
+- Elasticsearch (Full Text Search Engine)
+- Redis (Cache Disk & Memory)
+- RabbitMQ (Message Queue)
+- MongoDB (NoSql)
 
 
 ### MongoDB Auth
