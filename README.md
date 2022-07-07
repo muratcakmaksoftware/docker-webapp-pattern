@@ -13,10 +13,18 @@ docker-compose up -d
 - Elasticsearch (Full Text Search Engine)
 - Redis (Cache Disk & Memory)
 - RabbitMQ (Message Queue)
-- MongoDB (NoSql)
+- MongoDB (NoSql) & Mongo Express (isteğe bağlı) Veya yerine Studio 3T & MongoDB Compass
 
 
-### MongoDB Auth
+### RabbitMQ
+```
+Management
+Web bağlantısı: localhost:15672
+Default Admin: guest
+Default Password: guest
+```
+
+### MongoDB
 İlk çalıştırmada mongodb'de belirtilen kullanıcı adı ve şifre otomatik olarak tanımlanır.\
 Bu şekilde istersek kendimizde kullanıcı tanımlayabiliriz.
 ```
@@ -30,3 +38,4 @@ use admin
 //Veritabanına user eklenir.
 db.createUser({ user: "mongoadmin" , pwd: "mongoadmin", roles: ["userAdminAnyDatabase", "dbAdminAnyDatabase", "readWriteAnyDatabase"]})
 ```
+**Mango Express** web bağlantısı: **localhost:8081**
