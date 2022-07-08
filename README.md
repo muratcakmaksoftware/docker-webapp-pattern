@@ -10,11 +10,13 @@ docker-compose up -d
 - PHP
 - NGINX
 - Postgresql (Relational Database Management System (RDBMS))
-- Elasticsearch (Full Text Search Engine)
 - Redis (Cache Disk & Memory)
 - RabbitMQ (Message Queue)
 - MongoDB (NoSql) & Mongo Express (isteğe bağlı) Veya yerine Studio 3T & MongoDB Compass
-
+- ELK Stack\
+  **Elasticsearch (Full Text Search Engine)** (Indexing & Storage) **Verileri indeksler ve saklar.**\
+  **Logstash** (Data Aggregation & Processing) **Verileri toplar ve işler. İstenilen veritabanlarına dağıtır.**\
+  **Kibana** (Analysis & visualization) **Analiz edilen verileri panel üzerinden görselleştirme sağlar.**
 
 ### Redis
 #### Auth
