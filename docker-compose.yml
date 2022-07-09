@@ -136,20 +136,64 @@ services:
       default:
         ipv4_address: 172.20.0.70
 
-  elasticsearch:
-    restart: always
-    container_name: app-elasticsearch
+  #Multi-node cluster
+  elasticsearch-01:
+    #restart: no
+    container_name: app-elasticsearch-01
     build:
       context: ./docker/images/elasticsearch
       dockerfile: Dockerfile
+    environment:
+      - node.name=elasticsearch-01 #Düğüm adı
+      - cluster.name=es-myapp-cluster
+      - discovery.seed_hosts=elasticsearch-02 #,elasticsearch-02,... #Dikkat kendi servisi eklenmemelidir. #Diğer uygun düğümlerin bulunmasını sağlarız.
+      - cluster.initial_master_nodes=elasticsearch-01,elasticsearch-02 #Ana elasticsearch servislerinin hepsi yazılır. Sebebi bir ana düğüm çöktüğünde diğer düğümler devam etmelidir.
+      - bootstrap.memory_lock=true # İşletim sistemini yaptığı fazla bellek kullanmak ve kullanılmayan belleği örneğin disk ile memory swap(takas/değişim) için kullanması gibi şeyler performansı düşürdüğünden değişimi kapatmak ve elasticsearch performans için true önerilir.
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" #Java parametleridir. -Xms512m (min heap memory) -Xmx512m (Heap’in max heap memory) # Düğümün kullanılmasına izin verilen min ve maks ram miktarının belirlenmesidir.
+
+    #Geliştirme veya test ortamı için kullanılabilir hazır ayar. Sadece tek elasticsearch servisi olmalıdır.
+#    environment:
+#      - node.name=node01
+#      - cluster.name=es-myapp-cluster
+#      - discovery.type=single-node #bazı configuration atlamaktadır.
+#      - bootstrap.memory_lock=true
+#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     ports:
       - "9300:9300" # port 9300 for communication between nodes within the cluster (Required)
       - "9200:9200" # port 9200 for requests (Optional)
     volumes:
-      - ./docker/images/elasticsearch/data:/usr/share/elasticsearch/data
+      - ./docker/images/elasticsearch/data/01:/usr/share/elasticsearch/data
     networks:
       default:
         ipv4_address: 172.20.0.80
+
+  elasticsearch-02:
+    #restart: no
+    container_name: app-elasticsearch-02
+    build:
+      context: ./docker/images/elasticsearch
+      dockerfile: Dockerfile
+    environment:
+      - node.name=elasticsearch-02
+      - cluster.name=es-myapp-cluster
+      - discovery.seed_hosts=elasticsearch-01
+      - cluster.initial_master_nodes=elasticsearch-01,elasticsearch-02
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./docker/images/elasticsearch/data/02:/usr/share/elasticsearch/data
+    networks:
+      default:
+        ipv4_address: 172.20.0.90
 
 networks:
   default:
