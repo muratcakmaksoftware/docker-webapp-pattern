@@ -18,6 +18,30 @@ docker-compose up -d
   **Logstash** (Data Aggregation & Processing) **Verileri toplar ve işler. İstenilen veritabanlarına dağıtır.**\
   **Kibana** (Analysis & visualization) **Analiz edilen verileri panel üzerinden görselleştirme sağlar.**
 
+### Docker
+```
+Elasticsearch için gereklidir
+1)bootstrap check failure [1] of [2]: max virtual memory areas vm.max_map_count [65530] is too low,increase to at least [262144]
+//For Windows
+wsl -d docker-desktop
+sysctl -w vm.max_map_count=262144
+
+//For Linux
+sudo sysctl -w vm.max_map_count=262144
+Veya
+sudo echo 'vm.max_map_count=262144' >> /etc/sysctl.conf
+
+2)bootstrap check failure [2] of [2]: Transport SSL must be enabled if security is enabled. 
+Please set [xpack.security.transport.ssl.enabled] to [true] or disable security by setting [xpack.security.enabled] to [false]
+v6.8.0 dan itibaren elasticsearch basic security free olarak vermiştir.
+**xpack.security.enabled=true**
+//Farklı güvenlik olarak Search Guard bakılabilir:
+https://medium.com/devopsturkiye/open-source-olarak-kullanılan-elk-yapısında-güvenlik-nasıl-sağlanır-d9586148c82 
+
+Elasticsearch hata log burada cluster adınız altında bilgisi tutulur: 
+/usr/share/elasticsearch/logs/es-myapp-cluster.log
+```
+
 ### Redis
 #### Auth
 Default'da redis de şifre yoktur.\

@@ -1,0 +1,7 @@
+node.name: elasticsearch-02
+network.host: 0.0.0.0
+cluster.name: es-myapp-cluster
+discovery.seed_hosts: elasticsearch-01
+cluster.initial_master_nodes: elasticsearch-01,elasticsearch-02
+bootstrap.memory_lock: true
+xpack.security.enabled: true
