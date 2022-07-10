@@ -1,0 +1,14 @@
+instances:
+  - name: elasticsearch-01
+    dns:
+      - elasticsearch-01
+      - localhost
+    ip:
+      - 127.0.0.1
+
+  - name: elasticsearch-02
+    dns:
+      - elasticsearch-01
+      - localhost
+    ip:
+      - 127.0.0.1

@@ -1,1 +1,3 @@
-FROM elasticsearch:8.3.2
+ARG ELK_VERSION
+
+FROM elasticsearch:${ELK_VERSION}

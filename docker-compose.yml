@@ -137,11 +137,62 @@ services:
         ipv4_address: 172.20.0.70
 
   #Elasticsearch Multi-node cluster
+  elasticsearch-setup:
+    container_name: app-elasticsearch-setup
+    build:
+      context: ./docker/images/elasticsearch
+      args:
+        ELK_VERSION: ${ELK_VERSION:-8.3.2}
+      dockerfile: Dockerfile
+    volumes:
+      - ./docker/images/elasticsearch/certs:/usr/share/elasticsearch/config/certs
+      - ./docker/images/elasticsearch/config/setup/instances.yml:/usr/share/elasticsearch/config/certs/instances.yml
+    user: "0"
+    command: >
+      bash -c '
+        if [ x${ELASTIC_PASSWORD} == x ]; then
+          echo "Set the ELASTIC_PASSWORD environment variable in the .env file";
+          exit 1;
+        elif [ x${KIBANA_PASSWORD} == x ]; then
+          echo "Set the KIBANA_PASSWORD environment variable in the .env file";
+          exit 1;
+        fi;
+        if [ ! -f config/certs/ca.zip ]; then
+          echo "Creating CA";
+          bin/elasticsearch-certutil ca --silent --pem -out config/certs/ca.zip;
+          unzip config/certs/ca.zip -d config/certs;
+        fi;
+        if [ ! -f config/certs/certs.zip ]; then
+          echo "Creating certs";
+          bin/elasticsearch-certutil cert --silent --pem -out config/certs/certs.zip --in config/certs/instances.yml --ca-cert config/certs/ca/ca.crt --ca-key config/certs/ca/ca.key;
+          unzip config/certs/certs.zip -d config/certs;
+        fi;
+        echo "Setting file permissions"
+        chown -R root:root config/certs;
+        find . -type d -exec chmod 750 \{\} \;;
+        find . -type f -exec chmod 640 \{\} \;;
+        echo "Waiting for Elasticsearch availability";
+        until curl -s --cacert config/certs/ca/ca.crt https://elasticsearch-01:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
+        echo "Setting kibana_system password";
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u elastic:${ELASTIC_PASSWORD} -H "Content-Type: application/json" https://elasticsearch-01:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        echo "All done!";
+      '
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f config/certs/elasticsearch-01/elasticsearch-01.crt ]"]
+      interval: 1s
+      timeout: 5s
+      retries: 120
+
   elasticsearch-01:
     #restart: no
+    depends_on:
+      setup:
+        condition: service_healthy
     container_name: app-elasticsearch-01
     build:
       context: ./docker/images/elasticsearch
+      args:
+        ELK_VERSION: ${ELK_VERSION:-8.3.2}
       dockerfile: Dockerfile
     environment:
        - "ES_JAVA_OPTS=-Xms512m -Xmx512m" #Java parametleridir. -Xms512m (min heap memory) -Xmx512m (Heap’in max heap memory) # Düğümün kullanılmasına izin verilen min ve maks ram miktarının belirlenmesidir.
@@ -172,15 +223,21 @@ services:
     volumes:
       - ./docker/images/elasticsearch/data/01:/usr/share/elasticsearch/data
       - ./docker/images/elasticsearch/config/01/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./docker/images/elasticsearch/certs:/usr/share/elasticsearch/config/certs
     networks:
       default:
         ipv4_address: 172.20.0.80
 
   elasticsearch-02:
     #restart: no
+    depends_on:
+      setup:
+        condition: service_healthy
     container_name: app-elasticsearch-02
     build:
       context: ./docker/images/elasticsearch
+      args:
+        ELK_VERSION: ${ELK_VERSION:-8.3.2}
       dockerfile: Dockerfile
     environment:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
@@ -191,6 +248,7 @@ services:
     volumes:
       - ./docker/images/elasticsearch/data/02:/usr/share/elasticsearch/data
       - ./docker/images/elasticsearch/config/02/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./docker/images/elasticsearch/certs:/usr/share/elasticsearch/config/certs
     networks:
       default:
         ipv4_address: 172.20.0.90

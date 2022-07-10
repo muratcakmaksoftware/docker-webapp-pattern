@@ -95,3 +95,11 @@ db.createUser({ user: "mongoadmin" , pwd: "mongoadmin", roles: ["userAdminAnyDat
 - [MongoDB Compass](https://www.mongodb.com/try/download/compass)
 - [NoSQLBooster](https://nosqlbooster.com/downloads)
 - **Mango Express** web bağlantısı: **localhost:8081**
+
+### Elasticsearch
+#### Auth
+Şifreyi belirlemek için:
+```
+cd /usr/share/elasticsearch
+bin/elasticsearch-setup-passwords interactive
+```
