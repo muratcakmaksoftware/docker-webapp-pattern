@@ -158,6 +158,9 @@ services:
         elif [ x${KIBANA_PASSWORD} == x ]; then
           echo "Set the KIBANA_PASSWORD environment variable in the .env file";
           exit 1;
+        elif [ x${LOGSTASH_PASSWORD} == x ]; then
+          echo "Set the LOGSTASH_PASSWORD environment variable in the .env file";
+          exit 1;
         fi;
         if [ ! -f config/certs/ca.zip ]; then
           echo "Creating CA";
@@ -177,6 +180,8 @@ services:
         until curl -s --cacert config/certs/ca/ca.crt https://elasticsearch-01:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
         echo "Setting kibana_system password";
         until curl -s -X POST --cacert config/certs/ca/ca.crt -u elastic:${ELASTIC_PASSWORD} -H "Content-Type: application/json" https://elasticsearch-01:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 30; done;
+        echo "Setting logstash password";
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u elastic:${ELASTIC_PASSWORD} -H "Content-Type: application/json" https://elasticsearch-01:9200/_security/user/logstash_system/_password -d "{\"password\":\"${LOGSTASH_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
         echo "All done!";
       '
     healthcheck:
@@ -305,14 +310,39 @@ services:
     ports:
       - "5601:5601"
     environment:
-      - SERVERNAME=kibana
-      - ELASTICSEARCH_HOSTS=https://elasticsearch-01:9200
-      - ELASTICSEARCH_USERNAME=${KIBANA_USERNAME}
-      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
-      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
+      SERVERNAME: kibana
+      ELASTICSEARCH_HOSTS: https://elasticsearch-01:9200
+      ELASTICSEARCH_USERNAME: ${KIBANA_USERNAME}
+      ELASTICSEARCH_PASSWORD: ${KIBANA_PASSWORD}
+      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: config/certs/ca/ca.crt
     networks:
       default:
         ipv4_address: 172.20.0.100
+
+  logstash:
+    depends_on:
+      elasticsearch-setup:
+        condition: service_healthy
+    restart: always
+    container_name: app-logstash
+    build:
+      context: ./docker/images/logstash
+      args:
+        ELK_VERSION: ${ELK_VERSION}
+      dockerfile: Dockerfile
+    volumes:
+      - ./docker/images/elasticsearch/certs:/certs:z
+      - ./docker/images/logstash/config:/usr/share/logstash/config:ro
+    ports:
+      - "5046:5046" #default
+      - "9600:9600" #restapi
+    environment:
+      LS_JAVA_OPTS: -Xmx1G -Xms1G
+      ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+    networks:
+      default:
+        ipv4_address: 172.20.0.110
 
 networks:
   default:
