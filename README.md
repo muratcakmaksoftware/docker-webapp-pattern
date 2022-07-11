@@ -5,6 +5,11 @@
 docker-compose up -d
 ```
 
+## About
+Sıfırdan projeye başlarken veya mevcut projeye hızlı ayarları aktarabileceğimiz alt yapı ayarlamaktadır.\
+Projenin içerisinde Dockerfile dosyaları açık şekilde yapılandırılmıştır.\
+Bunun sebebi geliştirme sırasında değişikleri build alınıp en son production ortamı için o çıktıların kullanması içindir. Bu yöntem geliştirme sırasında kolaylık sağlamaktadır.
+
 ## Default Config
 
 - PHP
