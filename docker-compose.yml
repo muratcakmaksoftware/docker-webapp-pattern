@@ -121,6 +121,8 @@ services:
 
   #Eğer istiyorsanız mangodb GUI tool olarak mongo express kullanabiliriz.
   mongo-express:
+    depends_on:
+      - mongodb
     restart: always
     container_name: app-mongo-express
     build:
@@ -136,16 +138,16 @@ services:
       default:
         ipv4_address: 172.20.0.70
 
-  #Elasticsearch Multi-node cluster
+  #ELK Multi-node cluster
   elasticsearch-setup:
     container_name: app-elasticsearch-setup
     build:
       context: ./docker/images/elasticsearch
       args:
-        ELK_VERSION: ${ELK_VERSION:-8.3.2}
+        ELK_VERSION: ${ELK_VERSION}
       dockerfile: Dockerfile
     volumes:
-      - ./docker/images/elasticsearch/certs:/usr/share/elasticsearch/config/certs
+      - ./docker/images/elasticsearch/certs:/usr/share/elasticsearch/config/certs:z
       - ./docker/images/elasticsearch/config/setup/instances.yml:/usr/share/elasticsearch/config/certs/instances.yml
     user: "0"
     command: >
@@ -174,7 +176,7 @@ services:
         echo "Waiting for Elasticsearch availability";
         until curl -s --cacert config/certs/ca/ca.crt https://elasticsearch-01:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
         echo "Setting kibana_system password";
-        until curl -s -X POST --cacert config/certs/ca/ca.crt -u elastic:${ELASTIC_PASSWORD} -H "Content-Type: application/json" https://elasticsearch-01:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u elastic:${ELASTIC_PASSWORD} -H "Content-Type: application/json" https://elasticsearch-01:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 30; done;
         echo "All done!";
       '
     healthcheck:
@@ -184,26 +186,39 @@ services:
       retries: 120
 
   elasticsearch-01:
-    #restart: no
     depends_on:
-      setup:
+      elasticsearch-setup:
         condition: service_healthy
+    #restart: always
     container_name: app-elasticsearch-01
     build:
       context: ./docker/images/elasticsearch
       args:
-        ELK_VERSION: ${ELK_VERSION:-8.3.2}
+        ELK_VERSION: ${ELK_VERSION}
       dockerfile: Dockerfile
     environment:
-       - "ES_JAVA_OPTS=-Xms512m -Xmx512m" #Java parametleridir. -Xms512m (min heap memory) -Xmx512m (Heap’in max heap memory) # Düğümün kullanılmasına izin verilen min ve maks ram miktarının belirlenmesidir.
+      node.name: elasticsearch-01
+      cluster.name: es-myapp-cluster
+      network.host: 0.0.0.0 #herhangi bir ip den bilgi alabilmesi için belirlenmiştir. Default'dur
+      discovery.seed_hosts: elasticsearch-02 #,elasticsearch-02,... #Dikkat kendi servisi eklenmemelidir. #Diğer uygun düğümlerin bulunmasını sağlarız.
+      cluster.initial_master_nodes: elasticsearch-01,elasticsearch-02 #Ana elasticsearch servislerinin hepsi yazılır. Sebebi bir ana düğüm çöktüğünde diğer düğümler devam etmelidir.
+      bootstrap.memory_lock: true # İşletim sistemini yaptığı fazla bellek kullanmak ve kullanılmayan belleği örneğin disk ile memory swap(takas/değişim) için kullanması gibi şeyler performansı düşürdüğünden değişimi kapatmak ve elasticsearch performans için true önerilir.
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m" #Java parametreleridir. -Xms512m (min heap memory) -Xmx512m (Heap’in max heap memory) # Düğümün kullanılmasına izin verilen min ve maks ram miktarının belirlenmesidir.
 
-#      - node.name=elasticsearch-01
-#      - cluster.name=es-myapp-cluster
-#      - network.host=0.0.0.0 #herhangi bir ip den bilgi alabilmesi için belirlenmiştir. Default'dur
-#      - discovery.seed_hosts=elasticsearch-02 #,elasticsearch-02,... #Dikkat kendi servisi eklenmemelidir. #Diğer uygun düğümlerin bulunmasını sağlarız.
-#      - cluster.initial_master_nodes=elasticsearch-01,elasticsearch-02 #Ana elasticsearch servislerinin hepsi yazılır. Sebebi bir ana düğüm çöktüğünde diğer düğümler devam etmelidir.
-#      - bootstrap.memory_lock=true # İşletim sistemini yaptığı fazla bellek kullanmak ve kullanılmayan belleği örneğin disk ile memory swap(takas/değişim) için kullanması gibi şeyler performansı düşürdüğünden değişimi kapatmak ve elasticsearch performans için true önerilir.
-#      - xpack.security.enabled=false #versiyon 6.8.0 dan itibaren temel ücretsiz güvenlik koruması vermiştir.
+      # Security
+      xpack.security.enabled: true
+      xpack.security.http.ssl.enabled: true
+      xpack.security.http.ssl.key: certs/elasticsearch-01/elasticsearch-01.key
+      xpack.security.http.ssl.certificate: certs/elasticsearch-01/elasticsearch-01.crt
+      xpack.security.http.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.http.ssl.verification_mode: certificate
+      xpack.security.transport.ssl.enabled: true
+      xpack.security.transport.ssl.key: certs/elasticsearch-01/elasticsearch-01.key
+      xpack.security.transport.ssl.certificate: certs/elasticsearch-01/elasticsearch-01.crt
+      xpack.security.transport.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.transport.ssl.verification_mode: certificate
+      xpack.license.self_generated.type: ${ELASTIC_LICENSE}
 
     #Geliştirme veya test ortamı için kullanılabilir hazır ayar. Sadece tek elasticsearch servisi olmalıdır.
 #    environment:
@@ -221,37 +236,83 @@ services:
       - "9300:9300" # port 9300 for communication between nodes within the cluster (Required)
       - "9200:9200" # port 9200 for requests (Optional)
     volumes:
-      - ./docker/images/elasticsearch/data/01:/usr/share/elasticsearch/data
-      - ./docker/images/elasticsearch/config/01/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      - ./docker/images/elasticsearch/certs:/usr/share/elasticsearch/config/certs
+      - ./docker/images/elasticsearch/data/01:/usr/share/elasticsearch/data #elasticsearch Data
+      - ./docker/images/elasticsearch/certs:/usr/share/elasticsearch/config/certs #elasticsearch Certificates
     networks:
       default:
         ipv4_address: 172.20.0.80
 
   elasticsearch-02:
-    #restart: no
     depends_on:
-      setup:
+      elasticsearch-setup:
         condition: service_healthy
+    #restart: always
     container_name: app-elasticsearch-02
     build:
       context: ./docker/images/elasticsearch
       args:
-        ELK_VERSION: ${ELK_VERSION:-8.3.2}
+        ELK_VERSION: ${ELK_VERSION}
       dockerfile: Dockerfile
     environment:
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      node.name: elasticsearch-02
+      cluster.name: es-myapp-cluster
+      network.host: 0.0.0.0
+      discovery.seed_hosts: elasticsearch-01
+      cluster.initial_master_nodes: elasticsearch-01,elasticsearch-02
+      bootstrap.memory_lock: true
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+
+      # Security
+      xpack.security.enabled: true
+      xpack.security.http.ssl.enabled: true
+      xpack.security.http.ssl.key: certs/elasticsearch-02/elasticsearch-02.key
+      xpack.security.http.ssl.certificate: certs/elasticsearch-02/elasticsearch-02.crt
+      xpack.security.http.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.http.ssl.verification_mode: certificate
+      xpack.security.transport.ssl.enabled: true
+      xpack.security.transport.ssl.key: certs/elasticsearch-02/elasticsearch-02.key
+      xpack.security.transport.ssl.certificate: certs/elasticsearch-02/elasticsearch-02.crt
+      xpack.security.transport.ssl.certificate_authorities: certs/ca/ca.crt
+      xpack.security.transport.ssl.verification_mode: certificate
+      xpack.license.self_generated.type: ${ELASTIC_LICENSE}
+
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - ./docker/images/elasticsearch/data/02:/usr/share/elasticsearch/data
-      - ./docker/images/elasticsearch/config/02/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      - ./docker/images/elasticsearch/certs:/usr/share/elasticsearch/config/certs
+      - ./docker/images/elasticsearch/data/02:/usr/share/elasticsearch/data #elasticsearch Data
+      - ./docker/images/elasticsearch/certs:/usr/share/elasticsearch/config/certs #elasticsearch Certificates
     networks:
       default:
         ipv4_address: 172.20.0.90
+
+  kibana:
+    depends_on:
+      elasticsearch-setup:
+        condition: service_healthy
+    restart: always
+    container_name: app-kibana
+    build:
+      context: ./docker/images/kibana
+      args:
+        ELK_VERSION: ${ELK_VERSION}
+      dockerfile: Dockerfile
+    volumes:
+      - ./docker/images/elasticsearch/certs:/usr/share/kibana/config/certs
+      - ./docker/images/kibana/data:/usr/share/kibana/data
+    ports:
+      - "5601:5601"
+    environment:
+      - SERVERNAME=kibana
+      - ELASTICSEARCH_HOSTS=https://elasticsearch-01:9200
+      - ELASTICSEARCH_USERNAME=${KIBANA_USERNAME}
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
+    networks:
+      default:
+        ipv4_address: 172.20.0.100
 
 networks:
   default:

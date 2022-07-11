@@ -24,17 +24,20 @@ Elasticsearch için gereklidir
 1)bootstrap check failure [1] of [2]: max virtual memory areas vm.max_map_count [65530] is too low,increase to at least [262144]
 //For Windows
 wsl -d docker-desktop
+echo "vm.max_map_count = 262144"> /etc/sysctl.d/999-docker-desktop-conf
 sysctl -w vm.max_map_count=262144
 
 //For Linux
 sudo sysctl -w vm.max_map_count=262144
-Veya
+Ve bu ayarda kalıcılık sağlamak için:
 sudo echo 'vm.max_map_count=262144' >> /etc/sysctl.conf
 
 2)bootstrap check failure [2] of [2]: Transport SSL must be enabled if security is enabled. 
 Please set [xpack.security.transport.ssl.enabled] to [true] or disable security by setting [xpack.security.enabled] to [false]
+
 v6.8.0 dan itibaren elasticsearch basic security free olarak vermiştir.
 **xpack.security.enabled=true**
+
 //Farklı güvenlik olarak Search Guard bakılabilir:
 https://medium.com/devopsturkiye/open-source-olarak-kullanılan-elk-yapısında-güvenlik-nasıl-sağlanır-d9586148c82 
 
@@ -94,12 +97,13 @@ db.createUser({ user: "mongoadmin" , pwd: "mongoadmin", roles: ["userAdminAnyDat
 - [Studio 3T](https://studio3t.com/download/)
 - [MongoDB Compass](https://www.mongodb.com/try/download/compass)
 - [NoSQLBooster](https://nosqlbooster.com/downloads)
-- **Mango Express** web bağlantısı: **localhost:8081**
+- **Mango Express** Web Panel: **http://localhost:8081**
 
 ### Elasticsearch
 #### Auth
-Şifreyi belirlemek için:
+Web Panel: http://localhost:5601 \
+**Dikkat bağlanamazsanız:** elasticsearch-setup bittiğinden emin olunuz.
 ```
-cd /usr/share/elasticsearch
-bin/elasticsearch-setup-passwords interactive
+Default Admin: elastic
+Default Password: elastic123456
 ```

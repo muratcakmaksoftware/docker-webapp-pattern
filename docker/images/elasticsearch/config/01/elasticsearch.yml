@@ -1,6 +1,6 @@
 node.name: elasticsearch-01
 cluster.name: es-myapp-cluster
-#network.host: 0.0.0.0
+network.host: 0.0.0.0
 discovery.seed_hosts: elasticsearch-02
 cluster.initial_master_nodes: elasticsearch-01,elasticsearch-02
 bootstrap.memory_lock: true
@@ -18,4 +18,4 @@ xpack.security.transport.ssl.certificate: certs/elasticsearch-01/elasticsearch-0
 xpack.security.transport.ssl.certificate_authorities: certs/ca/ca.crt
 xpack.security.transport.ssl.verification_mode: certificate
 # License
-xpack.license.self_generated.type: basic
+xpack.license.self_generated.type: ${ELASTIC_LICENSE}

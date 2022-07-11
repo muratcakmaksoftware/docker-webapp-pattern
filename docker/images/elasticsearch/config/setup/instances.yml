@@ -8,7 +8,7 @@ instances:
 
   - name: elasticsearch-02
     dns:
-      - elasticsearch-01
+      - elasticsearch-02
       - localhost
     ip:
       - 127.0.0.1
