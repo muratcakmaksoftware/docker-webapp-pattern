@@ -1,0 +1,10 @@
+#- pipeline.id: default
+#  path.config: "/etc/logstash/conf.d/*.conf"
+
+- pipeline.id: basic
+  path.config: "/usr/share/logstash/pipeline/logstash.conf"
+  pipeline.workers: 3
+
+- pipeline.id: normal
+  path.config: "/usr/share/logstash/pipeline/normal.conf"
+  queue.type: persisted

@@ -138,7 +138,7 @@ services:
       default:
         ipv4_address: 172.20.0.70
 
-  #ELK Multi-node cluster
+  #ELK Stack Multi-node cluster
   elasticsearch-setup:
     container_name: app-elasticsearch-setup
     build:
@@ -147,7 +147,7 @@ services:
         ELK_VERSION: ${ELK_VERSION}
       dockerfile: Dockerfile
     volumes:
-      - ./docker/images/elasticsearch/certs:/usr/share/elasticsearch/config/certs:z
+      - ./docker/images/elasticsearch/certs:/usr/share/elasticsearch/config/certs
       - ./docker/images/elasticsearch/config/setup/instances.yml:/usr/share/elasticsearch/config/certs/instances.yml
     user: "0"
     command: >
@@ -332,7 +332,8 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./docker/images/elasticsearch/certs:/certs:z
-      - ./docker/images/logstash/config:/usr/share/logstash/config:ro
+      - ./docker/images/logstash/config:/usr/share/logstash/config
+      - ./docker/images/logstash/pipeline:/usr/share/logstash/pipeline
     ports:
       - "5046:5046" #default
       - "9600:9600" #restapi

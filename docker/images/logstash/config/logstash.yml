@@ -7,4 +7,4 @@ xpack.monitoring.elasticsearch.password: ${ELASTIC_PASSWORD}
 xpack.monitoring.elasticsearch.ssl.certificate_authority: /certs/ca/ca.crt
 
 ## X-Pack security credentials
-xpack.monitoring.enabled: true
+xpack.monitoring.enabled: false
