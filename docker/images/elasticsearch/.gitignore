@@ -1,2 +1,6 @@
-data/
-certs/
+certs/*
+!certs/.gitkeep
+data/01/*
+!data/01/.gitkeep
+data/02/*
+!data/02/.gitkeep

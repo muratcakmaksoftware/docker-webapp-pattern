@@ -1,0 +1,28 @@
+node.name: elasticsearch-01
+cluster.name: es-myapp-cluster
+network.host: 0.0.0.0 #herhangi bir ip den bilgi alabilmesi için belirlenmiştir. Default'dur
+discovery.seed_hosts: elasticsearch-02 #,elasticsearch-02,... #Dikkat kendi servisi eklenmemelidir. #Diğer uygun düğümlerin bulunmasını sağlarız.
+cluster.initial_master_nodes: elasticsearch-01,elasticsearch-02 #Ana elasticsearch servislerinin hepsi yazılır. Sebebi bir ana düğüm çöktüğünde diğer düğümler devam etmelidir.
+bootstrap.memory_lock: true # İşletim sistemini yaptığı fazla bellek kullanmak ve kullanılmayan belleği örneğin disk ile memory swap(takas/değişim) için kullanması gibi şeyler performansı düşürdüğünden değişimi kapatmak ve elasticsearch performans için true önerilir.
+
+# Security
+xpack.security.enabled: true
+xpack.security.http.ssl.enabled: true
+xpack.security.http.ssl.key: certs/elasticsearch-01/elasticsearch-01.key
+xpack.security.http.ssl.certificate: certs/elasticsearch-01/elasticsearch-01.crt
+xpack.security.http.ssl.certificate_authorities: certs/ca/ca.crt
+xpack.security.http.ssl.verification_mode: certificate
+xpack.security.transport.ssl.enabled: true
+xpack.security.transport.ssl.key: certs/elasticsearch-01/elasticsearch-01.key
+xpack.security.transport.ssl.certificate: certs/elasticsearch-01/elasticsearch-01.crt
+xpack.security.transport.ssl.certificate_authorities: certs/ca/ca.crt
+xpack.security.transport.ssl.verification_mode: certificate
+xpack.license.self_generated.type: ${ELASTIC_LICENSE}
+
+#Geliştirme veya test ortamı için kullanılabilir hazır ayar. Sadece tek elasticsearch servisi olmalıdır.
+#    environment:
+#      - node.name=node01
+#      - cluster.name=es-myapp-cluster
+#      - discovery.type=single-node #bazı configuration atlamaktadır.
+#      - bootstrap.memory_lock=true
+#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
