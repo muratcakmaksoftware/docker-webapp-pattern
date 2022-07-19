@@ -49,12 +49,15 @@ https://medium.com/devopsturkiye/open-source-olarak-kullanılan-elk-yapısında-
 Elasticsearch hata log burada cluster adınız altında bilgisi tutulur: 
 /usr/share/elasticsearch/logs/es-myapp-cluster.log
 ```
+### Postgresql
+#### Auth
+Mevcut ayarlarda postgresql DEFAULT bilgileri .env'de mevcuttur.
 
 ### Redis
 #### Auth
 Default'da redis de şifre yoktur.\
 Redis dışardan erişim açıyorsanız şifre koruması eklenmelidir.\
-Mevcut ayarlarda redis default şifresi .env'de belirlidir.
+Mevcut ayarlarda redis DEFAULT şifresi .env'de mevcuttur.
 ```
 //Manuel Redis şifre belirlemek için
 //Redis terminal den redis cli erişilir.
@@ -74,15 +77,14 @@ ACL ile username ve password şeklinde geniş bir yetkilendirme sağlanabilir.
 - [Redis GUI](https://github.com/ekvedaras/redis-gui)
 
 ### RabbitMQ
+Web Panel: http://localhost:15672
 ```
 Management
-Web bağlantısı: localhost:15672
 Default Admin: guest
 Default Password: guest
 ```
 
 ### MongoDB
-
 #### Auth
 İlk çalıştırmada mongodb'de belirtilen kullanıcı adı ve şifre otomatik olarak tanımlanır.\
 Bu şekilde istersek kendimizde kullanıcı tanımlayabiliriz.

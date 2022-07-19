@@ -5,6 +5,6 @@
   path.config: "/usr/share/logstash/pipeline/logstash.conf"
   pipeline.workers: 3
 
-- pipeline.id: normal
-  path.config: "/usr/share/logstash/pipeline/normal.conf"
-  queue.type: persisted
+#- pipeline.id: normal
+#  path.config: "/usr/share/logstash/pipeline/normal.conf"
+#  queue.type: persisted
