@@ -42,7 +42,7 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - ./docker/images/postgresql/data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     networks:
       default:
         ipv4_address: 172.20.0.30
@@ -309,4 +309,6 @@ networks:
 
 volumes:
   myapp:
+    driver: local
+  pgdata:
     driver: local
