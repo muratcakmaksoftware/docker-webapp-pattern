@@ -18,7 +18,7 @@ FROM php:8.1.6-fpm-alpine3.14
 
 #Composer Yüklemek için
 #ÖNERİLEN:
-#COPY --from=composer /usr/bin/composer /usr/bin/composer4
+#COPY --from=composer /usr/bin/composer /usr/bin/composer
 #VEYA ayrı bir RUN olarak çalışması gerekmektedir.
 #RUN curl -s https://getcomposer.org/installer | php
 
