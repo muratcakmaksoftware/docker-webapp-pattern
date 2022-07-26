@@ -1,0 +1,1 @@
+FROM bitnami/memcached:1.6.15-debian-11-r20

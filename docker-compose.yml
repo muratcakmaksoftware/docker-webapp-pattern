@@ -82,6 +82,25 @@ services:
       default:
         ipv4_address: 172.20.0.40
 
+  memcached:
+    restart: always
+    container_name: app-memcached
+    build:
+      context: ./docker/images/memcached
+      dockerfile: Dockerfile
+    ports:
+      - "11211:11211"
+    environment:
+      MEMCACHED_USERNAME: ${MEMCACHED_USERNAME:-root}
+      MEMCACHED_PASSWORD: ${MEMCACHED_PASSWORD:-123456}
+      MEMCACHED_CACHE_SIZE: ${MEMCACHED_CACHE_SIZE:-128} #Default 64MB
+      MEMCACHED_MAX_CONNECTIONS: ${MEMCACHED_MAX_CONNECTIONS:-2000} #Default 1024
+      MEMCACHED_THREADS: ${MEMCACHED_THREADS:-4} #Default 4
+      MEMCACHED_MAX_ITEM_SIZE: ${MEMCACHED_MAX_ITEM_SIZE:-1048576} # Kaydın maksimum kullanabileceği boyut: Default 1048576 = 1 mb | 8388608 = 8mb
+    networks:
+      default:
+        ipv4_address: 172.20.0.50
+
   rabbitmq:
     restart: always
     container_name: app-rabbitmq
@@ -99,7 +118,7 @@ services:
       RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST:-/}
     networks:
       default:
-        ipv4_address: 172.20.0.50
+        ipv4_address: 172.20.0.60
 
   mongodb:
     restart: always
@@ -117,7 +136,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-mongoadmin}
     networks:
       default:
-        ipv4_address: 172.20.0.60
+        ipv4_address: 172.20.0.70
 
   #Eğer istiyorsanız mangodb GUI tool olarak mongo express kullanabiliriz.
   mongo-express:
@@ -136,7 +155,7 @@ services:
       ME_CONFIG_MONGODB_SERVER: mongodb
     networks:
       default:
-        ipv4_address: 172.20.0.70
+        ipv4_address: 172.20.0.80
 
   #ELK Stack Multi-node cluster
   elasticsearch-setup:
@@ -218,7 +237,7 @@ services:
       - ./docker/images/elasticsearch/certs:/usr/share/elasticsearch/config/certs #elasticsearch Certificates
     networks:
       default:
-        ipv4_address: 172.20.0.80
+        ipv4_address: 172.20.0.90
 
   elasticsearch-02:
     depends_on:
@@ -245,7 +264,7 @@ services:
       - ./docker/images/elasticsearch/certs:/usr/share/elasticsearch/config/certs #elasticsearch Certificates
     networks:
       default:
-        ipv4_address: 172.20.0.90
+        ipv4_address: 172.20.0.100
 
   kibana:
     depends_on:
@@ -271,7 +290,7 @@ services:
       ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: config/certs/ca/ca.crt
     networks:
       default:
-        ipv4_address: 172.20.0.100
+        ipv4_address: 172.20.0.110
 
   logstash:
     depends_on:
@@ -297,7 +316,7 @@ services:
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
     networks:
       default:
-        ipv4_address: 172.20.0.110
+        ipv4_address: 172.20.0.120
 
 networks:
   default:
