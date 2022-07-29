@@ -16,6 +16,7 @@ Bunun sebebi geliştirme sırasında değişikleri build alınıp en son product
 - NGINX
 - Postgresql (Relational Database Management System (RDBMS))
 - Redis (Cache Disk & Memory)
+- Memcached (Cache Memory Alternative)
 - RabbitMQ (Message Queue)
 - MongoDB (NoSql) & Mongo Express (isteğe bağlı) Veya yerine Studio 3T & MongoDB Compass
 - ELK Stack\
@@ -75,6 +76,13 @@ ACL ile username ve password şeklinde geniş bir yetkilendirme sağlanabilir.
 #### GUI Clients
 - [Another Redis Desktop Manager](https://github.com/qishibo/AnotherRedisDesktopManager)
 - [Redis GUI](https://github.com/ekvedaras/redis-gui)
+
+### Memcached
+Client için telnet kullanılmaktadır verileri görüntülemek veya manuel olarak işlem yapmak istersek:
+```
+telnet <ip_address> <port>
+telnet localhost 11211
+```
 
 ### RabbitMQ
 Web Panel: http://localhost:15672

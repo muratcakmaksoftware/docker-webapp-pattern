@@ -213,7 +213,7 @@ services:
     depends_on:
       elasticsearch-setup:
         condition: service_healthy
-    #restart: always
+    restart: always
     container_name: app-elasticsearch-01
     build:
       context: ./docker/images/elasticsearch
@@ -243,7 +243,7 @@ services:
     depends_on:
       elasticsearch-setup:
         condition: service_healthy
-    #restart: always
+    restart: always
     container_name: app-elasticsearch-02
     build:
       context: ./docker/images/elasticsearch
@@ -270,7 +270,7 @@ services:
     depends_on:
       elasticsearch-setup:
         condition: service_healthy
-    #restart: always
+    restart: always
     container_name: app-kibana
     build:
       context: ./docker/images/kibana
@@ -296,7 +296,7 @@ services:
     depends_on:
       elasticsearch-setup:
         condition: service_healthy
-    #restart: always
+    restart: always
     container_name: app-logstash
     build:
       context: ./docker/images/logstash
